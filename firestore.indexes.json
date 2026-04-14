@@ -1,0 +1,44 @@
+{
+  "indexes": [
+    {
+      "collectionGroup": "commits",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "developer", "order": "ASCENDING" },
+        { "fieldPath": "committed_at", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "commits",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "ecosystems", "arrayConfig": "CONTAINS" },
+        { "fieldPath": "committed_at", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "developers",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "classification", "order": "ASCENDING" },
+        { "fieldPath": "total_commits", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "developers",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "ecosystems", "arrayConfig": "CONTAINS" },
+        { "fieldPath": "active_days_28d", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "ecosystem_snapshots",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "ecosystem", "order": "ASCENDING" },
+        { "fieldPath": "date", "order": "DESCENDING" }
+      ]
+    }
+  ]
+}
