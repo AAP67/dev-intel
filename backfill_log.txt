@@ -1,0 +1,28 @@
+nohup: ignoring input
+Loaded 482,540 repo mappings
+Table has 5,378,164 rows -> 108 chunks of 50,000
+
+--- Chunk 1/108 (offset 0) ---
+  Chunk 1: 50,000 commits, 9,470 devs, 0 skipped
+Traceback (most recent call last):
+  File "/workspaces/dev-intel/scripts/bq_to_firestore.py", line 307, in <module>
+    main()
+  File "/workspaces/dev-intel/scripts/bq_to_firestore.py", line 265, in main
+    commits, devs, skipped, dev_eco_dates = process_and_write_chunk(
+                                            ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspaces/dev-intel/scripts/bq_to_firestore.py", line 168, in process_and_write_chunk
+    .document(eco)
+     ^^^^^^^^^^^^^
+  File "/home/codespace/.python/current/lib/python3.12/site-packages/google/cloud/firestore_v1/base_collection.py", line 159, in document
+    return self._client.document(*child_path)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/codespace/.python/current/lib/python3.12/site-packages/google/cloud/firestore_v1/client.py", line 203, in document
+    return DocumentReference(
+           ^^^^^^^^^^^^^^^^^^
+  File "/home/codespace/.python/current/lib/python3.12/site-packages/google/cloud/firestore_v1/document.py", line 66, in __init__
+    super(DocumentReference, self).__init__(*path, **kwargs)
+  File "/home/codespace/.python/current/lib/python3.12/site-packages/google/cloud/firestore_v1/base_document.py", line 72, in __init__
+    _helpers.verify_path(path, is_collection=False)
+  File "/home/codespace/.python/current/lib/python3.12/site-packages/google/cloud/firestore_v1/_helpers.py", line 158, in verify_path
+    raise ValueError("A document must have an even number of path elements")
+ValueError: A document must have an even number of path elements

@@ -21,6 +21,11 @@ BATCH_SIZE = 200
 SLEEP = 0.5
 
 
+def safe_id(name):
+    """Sanitize strings for use as Firestore doc IDs (no slashes allowed)."""
+    return name.replace("/", "__")
+
+
 def load_repo_eco_map(path="scripts/repo_eco_map.json"):
     with open(path) as f:
         return json.load(f)
@@ -140,7 +145,7 @@ def process_and_write_chunk(rows, repo_eco_map, db, chunk_num, is_dry_run):
                 (compute_active_days_28d(dates) for dates in eco_dates.values()),
                 default=0,
             )
-            ref = db.collection("developers").document(username)
+            ref = db.collection("developers").document(safe_id(username))
             batch.set(ref, {
                 "github_username": username,
                 "github_id": data["github_id"],
@@ -163,9 +168,9 @@ def process_and_write_chunk(rows, repo_eco_map, db, chunk_num, is_dry_run):
             sorted_d = sorted(dates)
             ref = (
                 db.collection("developers")
-                .document(username)
+                .document(safe_id(username))
                 .collection("activity")
-                .document(eco)
+                .document(safe_id(eco))
             )
             batch.set(ref, {
                 "ecosystem": eco,
@@ -230,6 +235,11 @@ def update_ecosystem_aggregates(db, all_dev_eco_dates):
             batch = db.batch()
     batch.commit()
     print(f"  Updated {count} ecosystems")
+
+    top = sorted(eco_devs.items(), key=lambda x: -x[1]["total"])[:15]
+    print("\nTop 15 ecosystems by MAD:")
+    for eco, c in top:
+        print(f"  {eco:30s} MAD={c['total']:>6,}  FT={c['ft']:>6,}  PT={c['pt']:>6,}  OT={c['ot']:>6,}")
 
 
 def main():
