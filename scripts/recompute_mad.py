@@ -20,7 +20,7 @@ firebase_admin.initialize_app(credentials.Certificate(
 db = firestore.client()
 
 # Pretend "today" is April 1, 2026 (end of backfill window)
-latest_date = datetime(2026, 4, 1)
+latest_date = datetime(2025, 10, 8)
 cutoff = latest_date - timedelta(days=28)
 cutoff_str = cutoff.strftime("%Y-%m-%d")
 print(f"Using cutoff: {cutoff_str} (MAD = active within 28 days before this)")
