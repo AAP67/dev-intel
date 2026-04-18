@@ -19,7 +19,7 @@ firebase_admin.initialize_app(credentials.Certificate(
 ))
 db = firestore.client()
 
-# Pretend "today" is April 1, 2026 (end of backfill window)
+# Latest commit date in backfill data
 latest_date = datetime(2025,10, 8)
 cutoff = latest_date - timedelta(days=28)
 cutoff_str = cutoff.strftime("%Y-%m-%d")
