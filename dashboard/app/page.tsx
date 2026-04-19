@@ -2,21 +2,22 @@
 import { useState } from "react";
 
 const ecosystemData = [
-  { name: "Ethereum", mad: 5357, ft: 455, pt: 2658, ot: 2244, repos: 139856, color: "#627EEA" },
-  { name: "Solana", mad: 2660, ft: 317, pt: 1385, ot: 958, repos: 83532, color: "#9945FF" },
-  { name: "Base", mad: 1155, ft: 101, pt: 594, ot: 460, repos: 14033, color: "#0052FF" },
-  { name: "Polygon", mad: 1129, ft: 92, pt: 542, ot: 495, repos: 32219, color: "#8247E5" },
-  { name: "Bitcoin", mad: 928, ft: 112, pt: 492, ot: 324, repos: 18084, color: "#F7931A" },
-  { name: "Arbitrum", mad: 866, ft: 85, pt: 445, ot: 336, repos: 10258, color: "#28A0F0" },
-  { name: "Foundry", mad: 769, ft: 149, pt: 426, ot: 194, repos: 8364, color: "#555" },
-  { name: "BNB Chain", mad: 731, ft: 57, pt: 362, ot: 312, repos: 21868, color: "#F3BA2F" },
-  { name: "Sui", mad: 723, ft: 78, pt: 384, ot: 261, repos: 9394, color: "#4DA2FF" },
-  { name: "Polkadot", mad: 619, ft: 112, pt: 352, ot: 155, repos: 8850, color: "#E6007A" },
-  { name: "Stacks", mad: 568, ft: 14, pt: 120, ot: 434, repos: 11462, color: "#5546FF" },
-  { name: "Aptos", mad: 531, ft: 28, pt: 216, ot: 287, repos: 8725, color: "#2DD8A3" },
-  { name: "Optimism", mad: 499, ft: 57, pt: 263, ot: 179, repos: 5200, color: "#FF0420" },
-  { name: "Avalanche", mad: 492, ft: 49, pt: 251, ot: 192, repos: 6800, color: "#E84142" },
-  { name: "TON", mad: 456, ft: 42, pt: 228, ot: 186, repos: 4200, color: "#0098EA" },
+  { name: "XRP", mad: 174, ft: 12, pt: 77, ot: 85, repos: 2743, color: "#23292F", pinned: true },
+  { name: "Ethereum", mad: 5357, ft: 455, pt: 2658, ot: 2244, repos: 139856, color: "#627EEA", pinned: false },
+  { name: "Solana", mad: 2660, ft: 317, pt: 1385, ot: 958, repos: 83532, color: "#9945FF", pinned: false },
+  { name: "Base", mad: 1155, ft: 101, pt: 594, ot: 460, repos: 14033, color: "#0052FF", pinned: false },
+  { name: "Polygon", mad: 1129, ft: 92, pt: 542, ot: 495, repos: 32219, color: "#8247E5", pinned: false },
+  { name: "Bitcoin", mad: 928, ft: 112, pt: 492, ot: 324, repos: 18084, color: "#F7931A", pinned: false },
+  { name: "Arbitrum", mad: 866, ft: 85, pt: 445, ot: 336, repos: 10258, color: "#28A0F0", pinned: false },
+  { name: "Foundry", mad: 769, ft: 149, pt: 426, ot: 194, repos: 8364, color: "#555", pinned: false },
+  { name: "BNB Chain", mad: 731, ft: 57, pt: 362, ot: 312, repos: 21868, color: "#F3BA2F", pinned: false },
+  { name: "Sui", mad: 723, ft: 78, pt: 384, ot: 261, repos: 9394, color: "#4DA2FF", pinned: false },
+  { name: "Polkadot", mad: 619, ft: 112, pt: 352, ot: 155, repos: 8850, color: "#E6007A", pinned: false },
+  { name: "Stacks", mad: 568, ft: 14, pt: 120, ot: 434, repos: 11462, color: "#5546FF", pinned: false },
+  { name: "Aptos", mad: 531, ft: 28, pt: 216, ot: 287, repos: 8725, color: "#2DD8A3", pinned: false },
+  { name: "Optimism", mad: 499, ft: 57, pt: 263, ot: 179, repos: 5200, color: "#FF0420", pinned: false },
+  { name: "Avalanche", mad: 492, ft: 49, pt: 251, ot: 192, repos: 6800, color: "#E84142", pinned: false },
+  { name: "TON", mad: 456, ft: 42, pt: 228, ot: 186, repos: 4200, color: "#0098EA", pinned: false },
 ];
 
 function EcosystemDetail({ eco }: { eco: typeof ecosystemData[0] }) {
@@ -59,8 +60,9 @@ export default function Home() {
   const [selected, setSelected] = useState<string | null>(null);
   const [search, setSearch] = useState("");
 
-  const filtered = ecosystemData.filter((e) =>
-    e.name.toLowerCase().includes(search.toLowerCase())
+  const pinned = ecosystemData.filter((e) => e.pinned);
+  const ranked = ecosystemData.filter((e) =>
+    !e.pinned && e.name.toLowerCase().includes(search.toLowerCase())
   );
 
   return (
@@ -120,9 +122,9 @@ export default function Home() {
             }}
           />
           <div style={{ display: "flex", gap: "20px", fontSize: "10px", fontFamily: "var(--font-mono)", marginLeft: "auto", color: "#666" }}>
-            <span><span style={{ color: "#22c55e" }}>■</span> full-time</span>
-            <span><span style={{ color: "#3b82f6" }}>■</span> part-time</span>
-            <span><span style={{ color: "#333" }}>■</span> one-time</span>
+            <span style={{ color: "#22c55e" }}>■ full-time</span>
+            <span style={{ color: "#3b82f6" }}>■ part-time</span>
+            <span style={{ color: "#555" }}>■ one-time</span>
           </div>
         </div>
 
@@ -144,8 +146,53 @@ export default function Home() {
             <div style={{ textAlign: "right", color: "#555" }}>OT</div>
           </div>
 
-          {/* Data rows */}
-          {filtered.map((eco, i) => {
+          {/* Pinned rows */}
+          {pinned.map((eco) => {
+            const ftPct = (eco.ft / eco.mad) * 100;
+            const ptPct = (eco.pt / eco.mad) * 100;
+            const otPct = (eco.ot / eco.mad) * 100;
+            const isSelected = selected === eco.name;
+
+            return (
+              <div key={eco.name}>
+                <div
+                  onClick={() => setSelected(isSelected ? null : eco.name)}
+                  style={{
+                    display: "grid", gridTemplateColumns: "32px 130px 70px 1fr 50px 50px 50px",
+                    gap: "12px", padding: "12px 16px", cursor: "pointer",
+                    borderBottom: "2px solid #2a2a2a",
+                    background: "#0d0d0d",
+                    transition: "background 0.15s",
+                  }}
+                  onMouseEnter={(e) => { e.currentTarget.style.background = "#111"; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.background = "#0d0d0d"; }}
+                >
+                  <div style={{ fontSize: "11px", color: "#666", fontFamily: "var(--font-mono)", textAlign: "right", paddingTop: "2px" }}>
+                    ★
+                  </div>
+                  <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                    <div style={{ width: "6px", height: "6px", background: eco.color, flexShrink: 0 }} />
+                    <span style={{ fontSize: "13px", color: "#e0e0e0", fontWeight: 500 }}>{eco.name}</span>
+                  </div>
+                  <div style={{ fontSize: "14px", fontWeight: 300, color: "#ddd", textAlign: "right" }}>
+                    {eco.mad.toLocaleString()}
+                  </div>
+                  <div style={{ display: "flex", alignItems: "center", height: "100%" }}>
+                    <div style={{ width: `${ftPct}%`, height: "12px", background: "#22c55e", transition: "width 0.5s" }} />
+                    <div style={{ width: `${ptPct}%`, height: "12px", background: "#3b82f6", transition: "width 0.5s" }} />
+                    <div style={{ width: `${otPct}%`, height: "12px", background: "#2a2a2a", transition: "width 0.5s" }} />
+                  </div>
+                  <div style={{ fontSize: "11px", color: "#22c55e", textAlign: "right", fontFamily: "var(--font-mono)" }}>{eco.ft}</div>
+                  <div style={{ fontSize: "11px", color: "#3b82f6", textAlign: "right", fontFamily: "var(--font-mono)" }}>{eco.pt}</div>
+                  <div style={{ fontSize: "11px", color: "#555", textAlign: "right", fontFamily: "var(--font-mono)" }}>{eco.ot}</div>
+                </div>
+                {isSelected && <EcosystemDetail eco={eco} />}
+              </div>
+            );
+          })}
+
+          {/* Ranked rows */}
+          {ranked.map((eco, i) => {
             const ftPct = (eco.ft / eco.mad) * 100;
             const ptPct = (eco.pt / eco.mad) * 100;
             const otPct = (eco.ot / eco.mad) * 100;
