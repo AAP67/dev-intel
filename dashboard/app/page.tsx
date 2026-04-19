@@ -25,25 +25,30 @@ function EcosystemDetail({ eco }: { eco: typeof ecosystemData[0] }) {
   const otPct = ((eco.ot / eco.mad) * 100).toFixed(1);
 
   return (
-    <div className="px-4 py-6 bg-[#080808] border-b border-[#1a1a1a] animate-fadeIn">
-      <div className="grid grid-cols-3 gap-3">
-        <div className="p-4 border border-[#1a1a1a]">
-          <div className="text-[10px] uppercase tracking-[2px] text-green-500 mb-1 font-mono">Full-time</div>
-          <div className="text-2xl font-light text-gray-200">{eco.ft}</div>
-          <div className="text-[11px] text-gray-600 font-mono">{ftPct}% · 10+ days/mo</div>
+    <div style={{
+      padding: "24px 16px",
+      background: "#080808",
+      borderBottom: "1px solid #1a1a1a",
+      animation: "fadeIn 0.25s ease",
+    }}>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "12px" }}>
+        <div style={{ padding: "14px 16px", border: "1px solid #1a1a1a" }}>
+          <div style={{ fontSize: "10px", textTransform: "uppercase", letterSpacing: "2px", color: "#22c55e", marginBottom: "6px", fontFamily: "var(--font-mono)" }}>Full-time</div>
+          <div style={{ fontSize: "22px", fontWeight: 300, color: "#e0e0e0" }}>{eco.ft}</div>
+          <div style={{ fontSize: "11px", color: "#555", fontFamily: "var(--font-mono)" }}>{ftPct}% · 10+ days/mo</div>
         </div>
-        <div className="p-4 border border-[#1a1a1a]">
-          <div className="text-[10px] uppercase tracking-[2px] text-blue-500 mb-1 font-mono">Part-time</div>
-          <div className="text-2xl font-light text-gray-200">{eco.pt}</div>
-          <div className="text-[11px] text-gray-600 font-mono">{ptPct}% · 2-9 days/mo</div>
+        <div style={{ padding: "14px 16px", border: "1px solid #1a1a1a" }}>
+          <div style={{ fontSize: "10px", textTransform: "uppercase", letterSpacing: "2px", color: "#3b82f6", marginBottom: "6px", fontFamily: "var(--font-mono)" }}>Part-time</div>
+          <div style={{ fontSize: "22px", fontWeight: 300, color: "#e0e0e0" }}>{eco.pt}</div>
+          <div style={{ fontSize: "11px", color: "#555", fontFamily: "var(--font-mono)" }}>{ptPct}% · 2-9 days/mo</div>
         </div>
-        <div className="p-4 border border-[#1a1a1a]">
-          <div className="text-[10px] uppercase tracking-[2px] text-gray-500 mb-1 font-mono">One-time</div>
-          <div className="text-2xl font-light text-gray-200">{eco.ot}</div>
-          <div className="text-[11px] text-gray-600 font-mono">{otPct}% · 1 day</div>
+        <div style={{ padding: "14px 16px", border: "1px solid #1a1a1a" }}>
+          <div style={{ fontSize: "10px", textTransform: "uppercase", letterSpacing: "2px", color: "#666", marginBottom: "6px", fontFamily: "var(--font-mono)" }}>One-time</div>
+          <div style={{ fontSize: "22px", fontWeight: 300, color: "#e0e0e0" }}>{eco.ot}</div>
+          <div style={{ fontSize: "11px", color: "#555", fontFamily: "var(--font-mono)" }}>{otPct}% · 1 day</div>
         </div>
       </div>
-      <div className="mt-3 text-[11px] text-gray-700 font-mono">
+      <div style={{ marginTop: "12px", fontSize: "11px", color: "#444", fontFamily: "var(--font-mono)" }}>
         {eco.repos.toLocaleString()} repos tracked
       </div>
     </div>
@@ -59,63 +64,87 @@ export default function Home() {
   );
 
   return (
-    <div className="min-h-screen bg-[#050505] text-gray-200">
-      <div className="max-w-[960px] mx-auto px-6 py-10">
+    <div style={{ minHeight: "100vh", background: "#050505", color: "#e0e0e0", fontFamily: "var(--font-sans)" }}>
+      <style>{`
+        @keyframes fadeSlideIn {
+          from { opacity: 0; transform: translateY(6px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes fadeIn {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+      `}</style>
 
-        <div className="mb-10">
-          <div className="text-[10px] uppercase tracking-[4px] text-gray-700 mb-2 font-mono">
+      <div style={{ maxWidth: "960px", margin: "0 auto", padding: "40px 24px" }}>
+
+        {/* Header */}
+        <div style={{ marginBottom: "40px" }}>
+          <div style={{ fontSize: "10px", textTransform: "uppercase", letterSpacing: "4px", color: "#444", marginBottom: "8px", fontFamily: "var(--font-mono)" }}>
             ecoscout
           </div>
-          <h1 className="text-3xl font-light text-gray-200 tracking-tight">
+          <h1 style={{ fontSize: "28px", fontWeight: 300, color: "#e0e0e0", letterSpacing: "-0.5px" }}>
             Crypto developer intelligence
           </h1>
-          <p className="text-xs text-gray-600 mt-2 font-mono">
+          <p style={{ fontSize: "12px", color: "#555", marginTop: "6px", fontFamily: "var(--font-mono)" }}>
             Sep 10 – Oct 8, 2025 · 28-day MAD window
           </p>
         </div>
 
-        <div className="grid grid-cols-4 gap-[1px] mb-10 bg-[#1a1a1a] border border-[#1a1a1a]">
+        {/* Metric cards */}
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "1px", marginBottom: "40px", background: "#1a1a1a", border: "1px solid #1a1a1a" }}>
           {[
             { label: "Developers", value: "96,074", sub: "tracked" },
             { label: "Commits", value: "10.5M", sub: "2024–2025" },
             { label: "Ecosystems", value: "50", sub: "indexed" },
             { label: "Sources", value: "2", sub: "GH Archive + API" },
           ].map((m) => (
-            <div key={m.label} className="p-5 bg-[#0a0a0a]">
-              <div className="text-[11px] uppercase tracking-[2px] text-gray-600 mb-2 font-mono">{m.label}</div>
-              <div className="text-[28px] font-light text-gray-200">{m.value}</div>
-              <div className="text-[11px] text-gray-700 mt-1 font-mono">{m.sub}</div>
+            <div key={m.label} style={{ padding: "20px", background: "#0a0a0a" }}>
+              <div style={{ fontSize: "11px", textTransform: "uppercase", letterSpacing: "2px", color: "#666", marginBottom: "8px", fontFamily: "var(--font-mono)" }}>{m.label}</div>
+              <div style={{ fontSize: "28px", fontWeight: 300, color: "#e0e0e0" }}>{m.value}</div>
+              <div style={{ fontSize: "11px", color: "#444", marginTop: "4px", fontFamily: "var(--font-mono)" }}>{m.sub}</div>
             </div>
           ))}
         </div>
 
-        <div className="flex items-center gap-4 mb-3">
+        {/* Filter + legend */}
+        <div style={{ display: "flex", alignItems: "center", gap: "16px", marginBottom: "12px" }}>
           <input
             type="text"
             placeholder="Filter..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="bg-[#0a0a0a] border border-[#1a1a1a] px-3 py-2 text-xs text-gray-400 font-mono w-44 outline-none focus:border-[#333] transition-colors"
+            style={{
+              background: "#0a0a0a", border: "1px solid #1a1a1a", padding: "7px 12px",
+              fontSize: "12px", color: "#ccc", fontFamily: "var(--font-mono)", width: "180px", outline: "none",
+            }}
           />
-          <div className="flex gap-5 text-[10px] font-mono ml-auto text-gray-500">
-            <span><span className="text-green-500">—</span> full-time</span>
-            <span><span className="text-blue-500">—</span> part-time</span>
-            <span><span className="text-gray-600">—</span> one-time</span>
+          <div style={{ display: "flex", gap: "20px", fontSize: "10px", fontFamily: "var(--font-mono)", marginLeft: "auto", color: "#666" }}>
+            <span><span style={{ color: "#22c55e" }}>■</span> full-time</span>
+            <span><span style={{ color: "#3b82f6" }}>■</span> part-time</span>
+            <span><span style={{ color: "#333" }}>■</span> one-time</span>
           </div>
         </div>
 
-        <div className="border border-[#1a1a1a] overflow-hidden">
-          {/* Header */}
-          <div className="grid grid-cols-[32px_130px_70px_1fr_50px_50px_50px] gap-3 px-4 py-2 bg-[#080808] border-b border-[#1a1a1a] text-[10px] uppercase tracking-[1.5px] text-gray-700 font-mono">
-            <div className="text-right">#</div>
+        {/* Table */}
+        <div style={{ border: "1px solid #1a1a1a", overflow: "hidden" }}>
+          {/* Header row */}
+          <div style={{
+            display: "grid", gridTemplateColumns: "32px 130px 70px 1fr 50px 50px 50px",
+            gap: "12px", padding: "8px 16px", background: "#080808",
+            borderBottom: "1px solid #1a1a1a", fontSize: "10px", textTransform: "uppercase",
+            letterSpacing: "1.5px", color: "#444", fontFamily: "var(--font-mono)",
+          }}>
+            <div style={{ textAlign: "right" }}>#</div>
             <div>Ecosystem</div>
-            <div className="text-right">MAD</div>
+            <div style={{ textAlign: "right" }}>MAD</div>
             <div>Composition</div>
-            <div className="text-right text-green-600">FT</div>
-            <div className="text-right text-blue-600">PT</div>
-            <div className="text-right text-gray-600">OT</div>
+            <div style={{ textAlign: "right", color: "#22c55e" }}>FT</div>
+            <div style={{ textAlign: "right", color: "#3b82f6" }}>PT</div>
+            <div style={{ textAlign: "right", color: "#555" }}>OT</div>
           </div>
 
+          {/* Data rows */}
           {filtered.map((eco, i) => {
             const ftPct = (eco.ft / eco.mad) * 100;
             const ptPct = (eco.pt / eco.mad) * 100;
@@ -126,40 +155,37 @@ export default function Home() {
               <div key={eco.name}>
                 <div
                   onClick={() => setSelected(isSelected ? null : eco.name)}
-                  className={`grid grid-cols-[32px_130px_70px_1fr_50px_50px_50px] gap-3 px-4 py-3 cursor-pointer border-b border-[#111] transition-colors hover:bg-[#0a0a0a] ${isSelected ? "bg-[#0c0c0c]" : ""}`}
                   style={{
+                    display: "grid", gridTemplateColumns: "32px 130px 70px 1fr 50px 50px 50px",
+                    gap: "12px", padding: "12px 16px", cursor: "pointer",
+                    borderBottom: "1px solid #111",
+                    background: isSelected ? "#0c0c0c" : "transparent",
+                    transition: "background 0.15s",
                     animation: `fadeSlideIn 0.35s ease forwards`,
                     animationDelay: `${i * 30}ms`,
                     opacity: 0,
                   }}
+                  onMouseEnter={(e) => { if (!isSelected) e.currentTarget.style.background = "#0a0a0a"; }}
+                  onMouseLeave={(e) => { if (!isSelected) e.currentTarget.style.background = isSelected ? "#0c0c0c" : "transparent"; }}
                 >
-                  <div className="text-[11px] text-gray-700 font-mono text-right pt-0.5">
+                  <div style={{ fontSize: "11px", color: "#444", fontFamily: "var(--font-mono)", textAlign: "right", paddingTop: "2px" }}>
                     {String(i + 1).padStart(2, "0")}
                   </div>
-                  <div className="flex items-center gap-2">
-                    <div className="w-1.5 h-1.5 flex-shrink-0" style={{ background: eco.color }} />
-                    <span className="text-[13px] text-gray-400">{eco.name}</span>
+                  <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                    <div style={{ width: "6px", height: "6px", background: eco.color, flexShrink: 0 }} />
+                    <span style={{ fontSize: "13px", color: "#bbb" }}>{eco.name}</span>
                   </div>
-                  <div className="text-sm font-light text-gray-300 text-right">
+                  <div style={{ fontSize: "14px", fontWeight: 300, color: "#ddd", textAlign: "right" }}>
                     {eco.mad.toLocaleString()}
                   </div>
-                  <div className="flex items-center gap-0 h-full">
-                    <div
-                      className="h-[12px] bg-green-500/80 transition-all duration-500"
-                      style={{ width: `${ftPct}%` }}
-                    />
-                    <div
-                      className="h-[12px] bg-blue-500/70 transition-all duration-500"
-                      style={{ width: `${ptPct}%` }}
-                    />
-                    <div
-                      className="h-[12px] bg-[#2a2a2a] transition-all duration-500"
-                      style={{ width: `${otPct}%` }}
-                    />
+                  <div style={{ display: "flex", alignItems: "center", height: "100%" }}>
+                    <div style={{ width: `${ftPct}%`, height: "12px", background: "#22c55e", transition: "width 0.5s" }} />
+                    <div style={{ width: `${ptPct}%`, height: "12px", background: "#3b82f6", transition: "width 0.5s" }} />
+                    <div style={{ width: `${otPct}%`, height: "12px", background: "#2a2a2a", transition: "width 0.5s" }} />
                   </div>
-                  <div className="text-[11px] text-green-500/80 text-right font-mono">{eco.ft}</div>
-                  <div className="text-[11px] text-blue-500/70 text-right font-mono">{eco.pt}</div>
-                  <div className="text-[11px] text-gray-600 text-right font-mono">{eco.ot}</div>
+                  <div style={{ fontSize: "11px", color: "#22c55e", textAlign: "right", fontFamily: "var(--font-mono)" }}>{eco.ft}</div>
+                  <div style={{ fontSize: "11px", color: "#3b82f6", textAlign: "right", fontFamily: "var(--font-mono)" }}>{eco.pt}</div>
+                  <div style={{ fontSize: "11px", color: "#555", textAlign: "right", fontFamily: "var(--font-mono)" }}>{eco.ot}</div>
                 </div>
                 {isSelected && <EcosystemDetail eco={eco} />}
               </div>
@@ -167,7 +193,8 @@ export default function Home() {
           })}
         </div>
 
-        <div className="flex justify-between mt-5 text-[10px] text-gray-800 font-mono">
+        {/* Footer */}
+        <div style={{ display: "flex", justifyContent: "space-between", marginTop: "20px", fontSize: "10px", color: "#333", fontFamily: "var(--font-mono)" }}>
           <span>Electric Capital taxonomy · GitHub Archive · GitHub Events API</span>
           <span>francium77.com</span>
         </div>
