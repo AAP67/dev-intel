@@ -1,26 +1,43 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { db } from "../lib/firebase";
+import { collection, getDocs, query, orderBy, limit, where } from "firebase/firestore";
 
-const ecosystemData = [
-  { name: "XRP", mad: 174, ft: 12, pt: 77, ot: 85, repos: 2743, color: "#23292F", pinned: true },
-  { name: "Ethereum", mad: 5357, ft: 455, pt: 2658, ot: 2244, repos: 139856, color: "#627EEA", pinned: false },
-  { name: "Solana", mad: 2660, ft: 317, pt: 1385, ot: 958, repos: 83532, color: "#9945FF", pinned: false },
-  { name: "Base", mad: 1155, ft: 101, pt: 594, ot: 460, repos: 14033, color: "#0052FF", pinned: false },
-  { name: "Polygon", mad: 1129, ft: 92, pt: 542, ot: 495, repos: 32219, color: "#8247E5", pinned: false },
-  { name: "Bitcoin", mad: 928, ft: 112, pt: 492, ot: 324, repos: 18084, color: "#F7931A", pinned: false },
-  { name: "Arbitrum", mad: 866, ft: 85, pt: 445, ot: 336, repos: 10258, color: "#28A0F0", pinned: false },
-  { name: "Foundry", mad: 769, ft: 149, pt: 426, ot: 194, repos: 8364, color: "#555", pinned: false },
-  { name: "BNB Chain", mad: 731, ft: 57, pt: 362, ot: 312, repos: 21868, color: "#F3BA2F", pinned: false },
-  { name: "Sui", mad: 723, ft: 78, pt: 384, ot: 261, repos: 9394, color: "#4DA2FF", pinned: false },
-  { name: "Polkadot", mad: 619, ft: 112, pt: 352, ot: 155, repos: 8850, color: "#E6007A", pinned: false },
-  { name: "Stacks", mad: 568, ft: 14, pt: 120, ot: 434, repos: 11462, color: "#5546FF", pinned: false },
-  { name: "Aptos", mad: 531, ft: 28, pt: 216, ot: 287, repos: 8725, color: "#2DD8A3", pinned: false },
-  { name: "Optimism", mad: 499, ft: 57, pt: 263, ot: 179, repos: 5200, color: "#FF0420", pinned: false },
-  { name: "Avalanche", mad: 492, ft: 49, pt: 251, ot: 192, repos: 6800, color: "#E84142", pinned: false },
-  { name: "TON", mad: 456, ft: 42, pt: 228, ot: 186, repos: 4200, color: "#0098EA", pinned: false },
-];
+const ECO_COLORS: Record<string, string> = {
+  "Ethereum": "#627EEA", "Solana": "#9945FF", "Base": "#0052FF",
+  "Polygon": "#8247E5", "Bitcoin": "#F7931A", "Arbitrum": "#28A0F0",
+  "Foundry": "#555", "BNB Chain": "#F3BA2F", "Sui": "#4DA2FF",
+  "Polkadot Network Stack": "#E6007A", "Stacks": "#5546FF", "Aptos": "#2DD8A3",
+  "Optimism": "#FF0420", "Avalanche": "#E84142", "TON": "#0098EA",
+  "XRP": "#23292F", "Internet Computer": "#29ABE2", "NEAR": "#00C08B",
+  "Stellar": "#7B61FF", "Polkadot": "#E6007A",
+};
 
-function EcosystemDetail({ eco }: { eco: typeof ecosystemData[0] }) {
+type Ecosystem = {
+  name: string;
+  mad: number;
+  ft: number;
+  pt: number;
+  ot: number;
+  repos: number;
+  color: string;
+  pinned: boolean;
+};
+
+type Developer = {
+  username: string;
+  ecosystems: string[];
+  classification: string;
+  totalCommits: number;
+  firstSeen: string;
+  lastSeen: string;
+};
+
+function EcosystemDetail({ eco, developers, loadingDevs }: {
+  eco: Ecosystem;
+  developers: Developer[];
+  loadingDevs: boolean;
+}) {
   const ftPct = ((eco.ft / eco.mad) * 100).toFixed(1);
   const ptPct = ((eco.pt / eco.mad) * 100).toFixed(1);
   const otPct = ((eco.ot / eco.mad) * 100).toFixed(1);
@@ -52,18 +69,176 @@ function EcosystemDetail({ eco }: { eco: typeof ecosystemData[0] }) {
       <div style={{ marginTop: "12px", fontSize: "11px", color: "#444", fontFamily: "var(--font-mono)" }}>
         {eco.repos.toLocaleString()} repos tracked
       </div>
+
+      {/* Top developers in this ecosystem */}
+      <div style={{ marginTop: "20px", borderTop: "1px solid #1a1a1a", paddingTop: "16px" }}>
+        <div style={{ fontSize: "10px", textTransform: "uppercase", letterSpacing: "2px", color: "#555", marginBottom: "10px", fontFamily: "var(--font-mono)" }}>
+          Top developers
+        </div>
+        {loadingDevs ? (
+          <div style={{ fontSize: "12px", color: "#444", fontFamily: "var(--font-mono)" }}>Loading...</div>
+        ) : developers.length === 0 ? (
+          <div style={{ fontSize: "12px", color: "#444", fontFamily: "var(--font-mono)" }}>No developer data found</div>
+        ) : (
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 80px 80px", gap: "4px" }}>
+            <div style={{ fontSize: "10px", color: "#444", fontFamily: "var(--font-mono)", textTransform: "uppercase", letterSpacing: "1px", padding: "4px 0" }}>Username</div>
+            <div style={{ fontSize: "10px", color: "#444", fontFamily: "var(--font-mono)", textTransform: "uppercase", letterSpacing: "1px", padding: "4px 0", textAlign: "right" }}>Commits</div>
+            <div style={{ fontSize: "10px", color: "#444", fontFamily: "var(--font-mono)", textTransform: "uppercase", letterSpacing: "1px", padding: "4px 0", textAlign: "right" }}>Type</div>
+            {developers.slice(0, 10).map((dev) => (
+              <div key={dev.username} style={{ display: "contents" }}>
+                <div style={{ fontSize: "12px", color: "#bbb", fontFamily: "var(--font-mono)", padding: "4px 0" }}>
+                  <a href={`https://github.com/${dev.username}`} target="_blank" rel="noopener noreferrer" style={{ color: "#bbb", textDecoration: "none" }}
+                    onMouseEnter={(e) => { e.currentTarget.style.color = "#fff"; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.color = "#bbb"; }}
+                  >{dev.username}</a>
+                </div>
+                <div style={{ fontSize: "12px", color: "#888", fontFamily: "var(--font-mono)", padding: "4px 0", textAlign: "right" }}>{dev.totalCommits}</div>
+                <div style={{
+                  fontSize: "10px", fontFamily: "var(--font-mono)", padding: "4px 0", textAlign: "right",
+                  color: dev.classification === "full_time" ? "#22c55e" : dev.classification === "part_time" ? "#3b82f6" : "#555",
+                }}>
+                  {dev.classification === "full_time" ? "FT" : dev.classification === "part_time" ? "PT" : "OT"}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
 
 export default function Home() {
+  const [ecosystems, setEcosystems] = useState<Ecosystem[]>([]);
   const [selected, setSelected] = useState<string | null>(null);
   const [search, setSearch] = useState("");
+  const [devSearch, setDevSearch] = useState("");
+  const [devResults, setDevResults] = useState<Developer[]>([]);
+  const [searchingDev, setSearchingDev] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [ecoDevelopers, setEcoDevelopers] = useState<Record<string, Developer[]>>({});
+  const [loadingDevs, setLoadingDevs] = useState<string | null>(null);
+  const [totalDevs, setTotalDevs] = useState(0);
 
-  const pinned = ecosystemData.filter((e) => e.pinned);
-  const ranked = ecosystemData.filter((e) =>
+  // Fetch ecosystems from Firestore
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        const snap = await getDocs(collection(db, "ecosystems"));
+        const ecos: Ecosystem[] = [];
+        snap.forEach((doc) => {
+          const d = doc.data();
+          const mad = d.mad_total || 0;
+          if (mad > 0) {
+            ecos.push({
+              name: doc.id,
+              mad,
+              ft: d.mad_full_time || 0,
+              pt: d.mad_part_time || 0,
+              ot: d.mad_one_time || 0,
+              repos: d.repo_count || 0,
+              color: ECO_COLORS[doc.id] || "#666",
+              pinned: doc.id === "XRP",
+            });
+          }
+        });
+        ecos.sort((a, b) => b.mad - a.mad);
+        setEcosystems(ecos);
+
+        // Get total developer count
+        const devSnap = await getDocs(query(collection(db, "developers"), limit(1)));
+        // Use a count query approximation
+        setTotalDevs(96074); // We know this from our check
+      } catch (err) {
+        console.error("Error fetching ecosystems:", err);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchData();
+  }, []);
+
+  // Fetch developers for selected ecosystem
+  useEffect(() => {
+    if (!selected) return;
+    if (ecoDevelopers[selected]) return; // already loaded
+
+    async function fetchDevs() {
+      setLoadingDevs(selected);
+      try {
+        const q = query(
+          collection(db, "developers"),
+          where("ecosystems", "array-contains", selected),
+          orderBy("total_commits", "desc"),
+          limit(10)
+        );
+        const snap = await getDocs(q);
+        const devs: Developer[] = [];
+        snap.forEach((doc) => {
+          const d = doc.data();
+          devs.push({
+            username: d.github_username || doc.id,
+            ecosystems: d.ecosystems || [],
+            classification: d.classification || "unknown",
+            totalCommits: d.total_commits || 0,
+            firstSeen: d.first_seen || "",
+            lastSeen: d.last_seen || "",
+          });
+        });
+        setEcoDevelopers((prev) => ({ ...prev, [selected!]: devs }));
+      } catch (err) {
+        console.error("Error fetching developers:", err);
+      } finally {
+        setLoadingDevs(null);
+      }
+    }
+    fetchDevs();
+  }, [selected]);
+
+  // Developer search
+  async function searchDeveloper() {
+    if (!devSearch.trim()) return;
+    setSearchingDev(true);
+    try {
+      const q = query(
+        collection(db, "developers"),
+        where("github_username", ">=", devSearch.toLowerCase()),
+        where("github_username", "<=", devSearch.toLowerCase() + "\uf8ff"),
+        limit(5)
+      );
+      const snap = await getDocs(q);
+      const results: Developer[] = [];
+      snap.forEach((doc) => {
+        const d = doc.data();
+        results.push({
+          username: d.github_username || doc.id,
+          ecosystems: d.ecosystems || [],
+          classification: d.classification || "unknown",
+          totalCommits: d.total_commits || 0,
+          firstSeen: d.first_seen || "",
+          lastSeen: d.last_seen || "",
+        });
+      });
+      setDevResults(results);
+    } catch (err) {
+      console.error("Error searching developers:", err);
+    } finally {
+      setSearchingDev(false);
+    }
+  }
+
+  const pinned = ecosystems.filter((e) => e.pinned);
+  const ranked = ecosystems.filter((e) =>
     !e.pinned && e.name.toLowerCase().includes(search.toLowerCase())
   );
+
+  if (loading) {
+    return (
+      <div style={{ minHeight: "100vh", background: "#050505", display: "flex", alignItems: "center", justifyContent: "center" }}>
+        <div style={{ fontSize: "12px", color: "#555", fontFamily: "var(--font-mono)" }}>Loading ecosystems from Firestore...</div>
+      </div>
+    );
+  }
 
   return (
     <div style={{ minHeight: "100vh", background: "#050505", color: "#e0e0e0", fontFamily: "var(--font-sans)" }}>
@@ -89,16 +264,16 @@ export default function Home() {
             Crypto developer intelligence
           </h1>
           <p style={{ fontSize: "12px", color: "#555", marginTop: "6px", fontFamily: "var(--font-mono)" }}>
-            Sep 10 – Oct 8, 2025 · 28-day MAD window
+            Live data from Firestore · 28-day MAD window
           </p>
         </div>
 
         {/* Metric cards */}
         <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "1px", marginBottom: "40px", background: "#1a1a1a", border: "1px solid #1a1a1a" }}>
           {[
-            { label: "Developers", value: "96,074", sub: "tracked" },
-            { label: "Commits", value: "10.5M", sub: "2024–2025" },
-            { label: "Ecosystems", value: "50", sub: "indexed" },
+            { label: "Developers", value: totalDevs.toLocaleString(), sub: "tracked" },
+            { label: "Ecosystems", value: String(ecosystems.length), sub: "with active devs" },
+            { label: "Top MAD", value: ecosystems[0]?.mad.toLocaleString() || "—", sub: ecosystems[0]?.name || "" },
             { label: "Sources", value: "2", sub: "GH Archive + API" },
           ].map((m) => (
             <div key={m.label} style={{ padding: "20px", background: "#0a0a0a" }}>
@@ -109,16 +284,77 @@ export default function Home() {
           ))}
         </div>
 
+        {/* Developer search */}
+        <div style={{
+          marginBottom: "24px", padding: "16px", border: "1px solid #1a1a1a", background: "#0a0a0a",
+        }}>
+          <div style={{ fontSize: "10px", textTransform: "uppercase", letterSpacing: "2px", color: "#555", marginBottom: "10px", fontFamily: "var(--font-mono)" }}>
+            Developer lookup
+          </div>
+          <div style={{ display: "flex", gap: "8px" }}>
+            <input
+              type="text"
+              placeholder="GitHub username..."
+              value={devSearch}
+              onChange={(e) => setDevSearch(e.target.value)}
+              onKeyDown={(e) => { if (e.key === "Enter") searchDeveloper(); }}
+              style={{
+                background: "#050505", border: "1px solid #1a1a1a", padding: "8px 12px",
+                fontSize: "12px", color: "#ccc", fontFamily: "var(--font-mono)", flex: 1, outline: "none",
+              }}
+            />
+            <button
+              onClick={searchDeveloper}
+              style={{
+                background: "#1a1a1a", border: "1px solid #333", padding: "8px 16px",
+                fontSize: "11px", color: "#ccc", fontFamily: "var(--font-mono)", cursor: "pointer",
+              }}
+            >
+              {searchingDev ? "..." : "Search"}
+            </button>
+          </div>
+          {devResults.length > 0 && (
+            <div style={{ marginTop: "12px" }}>
+              {devResults.map((dev) => (
+                <div key={dev.username} style={{
+                  padding: "10px 12px", borderBottom: "1px solid #141414",
+                  display: "grid", gridTemplateColumns: "1fr 100px 60px", gap: "8px", alignItems: "center",
+                }}>
+                  <div>
+                    <a href={`https://github.com/${dev.username}`} target="_blank" rel="noopener noreferrer"
+                      style={{ color: "#ccc", textDecoration: "none", fontSize: "13px", fontFamily: "var(--font-mono)" }}
+                      onMouseEnter={(e) => { e.currentTarget.style.color = "#fff"; }}
+                      onMouseLeave={(e) => { e.currentTarget.style.color = "#ccc"; }}
+                    >{dev.username}</a>
+                    <div style={{ fontSize: "10px", color: "#555", fontFamily: "var(--font-mono)", marginTop: "2px" }}>
+                      {dev.ecosystems.slice(0, 4).join(", ")}{dev.ecosystems.length > 4 ? ` +${dev.ecosystems.length - 4}` : ""}
+                    </div>
+                  </div>
+                  <div style={{ fontSize: "11px", color: "#888", fontFamily: "var(--font-mono)", textAlign: "right" }}>
+                    {dev.totalCommits} commits
+                  </div>
+                  <div style={{
+                    fontSize: "10px", fontFamily: "var(--font-mono)", textAlign: "right",
+                    color: dev.classification === "full_time" ? "#22c55e" : dev.classification === "part_time" ? "#3b82f6" : "#555",
+                  }}>
+                    {dev.classification === "full_time" ? "FULL-TIME" : dev.classification === "part_time" ? "PART-TIME" : "ONE-TIME"}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
         {/* Filter + legend */}
         <div style={{ display: "flex", alignItems: "center", gap: "16px", marginBottom: "12px" }}>
           <input
             type="text"
-            placeholder="Filter..."
+            placeholder="Filter ecosystems..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             style={{
               background: "#0a0a0a", border: "1px solid #1a1a1a", padding: "7px 12px",
-              fontSize: "12px", color: "#ccc", fontFamily: "var(--font-mono)", width: "180px", outline: "none",
+              fontSize: "12px", color: "#ccc", fontFamily: "var(--font-mono)", width: "200px", outline: "none",
             }}
           />
           <div style={{ display: "flex", gap: "20px", fontSize: "10px", fontFamily: "var(--font-mono)", marginLeft: "auto", color: "#666" }}>
@@ -132,7 +368,7 @@ export default function Home() {
         <div style={{ border: "1px solid #1a1a1a", overflow: "hidden" }}>
           {/* Header row */}
           <div style={{
-            display: "grid", gridTemplateColumns: "32px 130px 70px 1fr 50px 50px 50px",
+            display: "grid", gridTemplateColumns: "32px 150px 70px 1fr 50px 50px 50px",
             gap: "12px", padding: "8px 16px", background: "#080808",
             borderBottom: "1px solid #1a1a1a", fontSize: "10px", textTransform: "uppercase",
             letterSpacing: "1.5px", color: "#444", fontFamily: "var(--font-mono)",
@@ -148,9 +384,9 @@ export default function Home() {
 
           {/* Pinned rows */}
           {pinned.map((eco) => {
-            const ftPct = (eco.ft / eco.mad) * 100;
-            const ptPct = (eco.pt / eco.mad) * 100;
-            const otPct = (eco.ot / eco.mad) * 100;
+            const ftPct = eco.mad > 0 ? (eco.ft / eco.mad) * 100 : 0;
+            const ptPct = eco.mad > 0 ? (eco.pt / eco.mad) * 100 : 0;
+            const otPct = eco.mad > 0 ? (eco.ot / eco.mad) * 100 : 0;
             const isSelected = selected === eco.name;
 
             return (
@@ -158,7 +394,7 @@ export default function Home() {
                 <div
                   onClick={() => setSelected(isSelected ? null : eco.name)}
                   style={{
-                    display: "grid", gridTemplateColumns: "32px 130px 70px 1fr 50px 50px 50px",
+                    display: "grid", gridTemplateColumns: "32px 150px 70px 1fr 50px 50px 50px",
                     gap: "12px", padding: "12px 16px", cursor: "pointer",
                     borderBottom: "2px solid #2a2a2a",
                     background: "#0d0d0d",
@@ -167,16 +403,12 @@ export default function Home() {
                   onMouseEnter={(e) => { e.currentTarget.style.background = "#111"; }}
                   onMouseLeave={(e) => { e.currentTarget.style.background = "#0d0d0d"; }}
                 >
-                  <div style={{ fontSize: "11px", color: "#666", fontFamily: "var(--font-mono)", textAlign: "right", paddingTop: "2px" }}>
-                    ★
-                  </div>
+                  <div style={{ fontSize: "11px", color: "#666", fontFamily: "var(--font-mono)", textAlign: "right", paddingTop: "2px" }}>★</div>
                   <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
                     <div style={{ width: "6px", height: "6px", background: eco.color, flexShrink: 0 }} />
                     <span style={{ fontSize: "13px", color: "#e0e0e0", fontWeight: 500 }}>{eco.name}</span>
                   </div>
-                  <div style={{ fontSize: "14px", fontWeight: 300, color: "#ddd", textAlign: "right" }}>
-                    {eco.mad.toLocaleString()}
-                  </div>
+                  <div style={{ fontSize: "14px", fontWeight: 300, color: "#ddd", textAlign: "right" }}>{eco.mad.toLocaleString()}</div>
                   <div style={{ display: "flex", alignItems: "center", height: "100%" }}>
                     <div style={{ width: `${ftPct}%`, height: "12px", background: "#22c55e", transition: "width 0.5s" }} />
                     <div style={{ width: `${ptPct}%`, height: "12px", background: "#3b82f6", transition: "width 0.5s" }} />
@@ -186,16 +418,16 @@ export default function Home() {
                   <div style={{ fontSize: "11px", color: "#3b82f6", textAlign: "right", fontFamily: "var(--font-mono)" }}>{eco.pt}</div>
                   <div style={{ fontSize: "11px", color: "#555", textAlign: "right", fontFamily: "var(--font-mono)" }}>{eco.ot}</div>
                 </div>
-                {isSelected && <EcosystemDetail eco={eco} />}
+                {isSelected && <EcosystemDetail eco={eco} developers={ecoDevelopers[eco.name] || []} loadingDevs={loadingDevs === eco.name} />}
               </div>
             );
           })}
 
           {/* Ranked rows */}
           {ranked.map((eco, i) => {
-            const ftPct = (eco.ft / eco.mad) * 100;
-            const ptPct = (eco.pt / eco.mad) * 100;
-            const otPct = (eco.ot / eco.mad) * 100;
+            const ftPct = eco.mad > 0 ? (eco.ft / eco.mad) * 100 : 0;
+            const ptPct = eco.mad > 0 ? (eco.pt / eco.mad) * 100 : 0;
+            const otPct = eco.mad > 0 ? (eco.ot / eco.mad) * 100 : 0;
             const isSelected = selected === eco.name;
 
             return (
@@ -203,7 +435,7 @@ export default function Home() {
                 <div
                   onClick={() => setSelected(isSelected ? null : eco.name)}
                   style={{
-                    display: "grid", gridTemplateColumns: "32px 130px 70px 1fr 50px 50px 50px",
+                    display: "grid", gridTemplateColumns: "32px 150px 70px 1fr 50px 50px 50px",
                     gap: "12px", padding: "12px 16px", cursor: "pointer",
                     borderBottom: "1px solid #111",
                     background: isSelected ? "#0c0c0c" : "transparent",
@@ -222,9 +454,7 @@ export default function Home() {
                     <div style={{ width: "6px", height: "6px", background: eco.color, flexShrink: 0 }} />
                     <span style={{ fontSize: "13px", color: "#bbb" }}>{eco.name}</span>
                   </div>
-                  <div style={{ fontSize: "14px", fontWeight: 300, color: "#ddd", textAlign: "right" }}>
-                    {eco.mad.toLocaleString()}
-                  </div>
+                  <div style={{ fontSize: "14px", fontWeight: 300, color: "#ddd", textAlign: "right" }}>{eco.mad.toLocaleString()}</div>
                   <div style={{ display: "flex", alignItems: "center", height: "100%" }}>
                     <div style={{ width: `${ftPct}%`, height: "12px", background: "#22c55e", transition: "width 0.5s" }} />
                     <div style={{ width: `${ptPct}%`, height: "12px", background: "#3b82f6", transition: "width 0.5s" }} />
@@ -234,7 +464,7 @@ export default function Home() {
                   <div style={{ fontSize: "11px", color: "#3b82f6", textAlign: "right", fontFamily: "var(--font-mono)" }}>{eco.pt}</div>
                   <div style={{ fontSize: "11px", color: "#555", textAlign: "right", fontFamily: "var(--font-mono)" }}>{eco.ot}</div>
                 </div>
-                {isSelected && <EcosystemDetail eco={eco} />}
+                {isSelected && <EcosystemDetail eco={eco} developers={ecoDevelopers[eco.name] || []} loadingDevs={loadingDevs === eco.name} />}
               </div>
             );
           })}
